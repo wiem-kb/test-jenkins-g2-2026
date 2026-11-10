@@ -1,0 +1,50 @@
+pipeline {
+
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                echo 'Recuperation du code source'
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo 'Verification des fichiers'
+
+                bat 'if not exist index.html exit /b 1'
+                bat 'if not exist style.css exit /b 1'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Verification du fichier HTML'
+
+                bat 'findstr /C:"<html" index.html'
+                bat 'findstr /C:"<h1>" index.html'
+            }
+        }
+
+        stage('Delivery') {
+            steps {
+                echo 'Archivage du site web'
+
+                archiveArtifacts artifacts: '*.html, *.css'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline termine avec succes !'
+        }
+
+        failure {
+            echo 'Erreur detectee dans le pipeline !'
+        }
+    }
+}
